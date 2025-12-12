@@ -49,6 +49,11 @@ export {
 } from "./pcb-fabrication-note-rect"
 
 export {
+  drawPcbNoteRect,
+  type DrawPcbNoteRectParams,
+} from "./pcb-note-rect"
+
+export {
   drawPcbFabricationNotePath,
   type DrawPcbFabricationNotePathParams,
 } from "./pcb-fabrication-note-path"
