@@ -1,112 +1,13 @@
 import { lineAlphabet } from "@tscircuit/alphabet"
 import type { Matrix } from "transformation-matrix"
 import { applyToPoint } from "transformation-matrix"
-import type { CanvasContext } from "../types"
-
-const GLYPH_WIDTH_RATIO = 0.62
-const LETTER_SPACING_RATIO = 0.3 // Letter spacing between characters (25% of glyph width)
-const SPACE_WIDTH_RATIO = 1
-const STROKE_WIDTH_RATIO = 0.13
-
-export type AlphabetLayout = {
-  width: number
-  height: number
-  glyphWidth: number
-  letterSpacing: number
-  spaceWidth: number
-  strokeWidth: number
-}
-
-export function getAlphabetLayout(
-  text: string,
-  fontSize: number,
-): AlphabetLayout {
-  const glyphWidth = fontSize * GLYPH_WIDTH_RATIO
-  const letterSpacing = glyphWidth * LETTER_SPACING_RATIO
-  const spaceWidth = glyphWidth * SPACE_WIDTH_RATIO
-  const characters = Array.from(text)
-
-  let width = 0
-  characters.forEach((char, index) => {
-    const advance = char === " " ? spaceWidth : glyphWidth
-    width += advance
-    if (index < characters.length - 1) width += letterSpacing
-  })
-
-  const strokeWidth = Math.max(fontSize * STROKE_WIDTH_RATIO, 0.35)
-
-  return {
-    width,
-    height: fontSize,
-    glyphWidth,
-    letterSpacing,
-    spaceWidth,
-    strokeWidth,
-  }
-}
+import type { CanvasContext } from "../../types"
+import type { NinePointAnchor } from "circuit-json"
+import { getAlphabetLayout, type AlphabetLayout } from "./getAlphabetLayout"
+import { getTextStartPosition } from "./getTextStartPosition"
 
 const getGlyphLines = (char: string) =>
   lineAlphabet[char] ?? lineAlphabet[char.toUpperCase()]
-
-export type AnchorAlignment =
-  | "center"
-  | "top_left"
-  | "top_right"
-  | "bottom_left"
-  | "bottom_right"
-  | "left"
-  | "right"
-  | "top"
-  | "bottom"
-
-export function getTextStartPosition(
-  alignment: AnchorAlignment,
-  layout: AlphabetLayout,
-): { x: number; y: number } {
-  const totalWidth = layout.width + layout.strokeWidth
-  const totalHeight = layout.height + layout.strokeWidth
-
-  let x = 0
-  let y = 0
-
-  // Horizontal alignment
-  if (alignment === "center") {
-    x = -totalWidth / 2
-  } else if (
-    alignment === "top_left" ||
-    alignment === "bottom_left" ||
-    alignment === "left"
-  ) {
-    x = 0
-  } else if (
-    alignment === "top_right" ||
-    alignment === "bottom_right" ||
-    alignment === "right"
-  ) {
-    x = -totalWidth
-  }
-
-  // Vertical alignment
-  if (alignment === "center") {
-    y = -totalHeight / 2
-  } else if (
-    alignment === "top_left" ||
-    alignment === "top_right" ||
-    alignment === "top"
-  ) {
-    y = 0
-  } else if (
-    alignment === "bottom_left" ||
-    alignment === "bottom_right" ||
-    alignment === "bottom"
-  ) {
-    y = -totalHeight
-  } else {
-    y = 0
-  }
-
-  return { x, y }
-}
 
 export function strokeAlphabetText(
   ctx: CanvasContext,
@@ -154,7 +55,7 @@ export interface DrawTextParams {
   fontSize: number
   color: string
   realToCanvasMat: Matrix
-  anchorAlignment: AnchorAlignment
+  anchorAlignment: NinePointAnchor
   rotation?: number
 }
 
