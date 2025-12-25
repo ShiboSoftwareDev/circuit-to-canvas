@@ -1,10 +1,10 @@
 import type {
   AnyCircuitElement,
   PcbPlatedHole,
-  PCBVia,
-  PCBHole,
+  PcbVia,
+  PcbHole,
   PcbSmtPad,
-  PCBTrace,
+  PcbTrace,
   PcbBoard,
   PcbSilkscreenText,
   PcbSilkscreenRect,
@@ -23,7 +23,9 @@ import type {
   PcbNoteText,
   PcbNoteDimension,
   PcbNoteLine,
+  PcbRenderLayer,
 } from "circuit-json"
+import { shouldDrawElement } from "./pcb-render-layer-filter"
 import { identity, compose, translate, scale } from "transformation-matrix"
 import type { Matrix } from "transformation-matrix"
 import {
@@ -58,7 +60,7 @@ import { drawPcbNoteDimension } from "./elements/pcb-note-dimension"
 import { drawPcbNoteLine } from "./elements/pcb-note-line"
 
 export interface DrawElementsOptions {
-  layers?: string[]
+  layers?: PcbRenderLayer[]
 }
 
 interface CanvasLike {
@@ -155,6 +157,11 @@ export class CircuitToCanvasDrawer {
     element: AnyCircuitElement,
     options: DrawElementsOptions,
   ): void {
+    // Check if element should be drawn based on layer options
+    if (!shouldDrawElement(element, options)) {
+      return
+    }
+
     if (element.type === "pcb_plated_hole") {
       drawPcbPlatedHole({
         ctx: this.ctx,
@@ -167,7 +174,7 @@ export class CircuitToCanvasDrawer {
     if (element.type === "pcb_via") {
       drawPcbVia({
         ctx: this.ctx,
-        via: element as PCBVia,
+        via: element as PcbVia,
         realToCanvasMat: this.realToCanvasMat,
         colorMap: this.colorMap,
       })
@@ -176,7 +183,7 @@ export class CircuitToCanvasDrawer {
     if (element.type === "pcb_hole") {
       drawPcbHole({
         ctx: this.ctx,
-        hole: element as PCBHole,
+        hole: element as PcbHole,
         realToCanvasMat: this.realToCanvasMat,
         colorMap: this.colorMap,
       })
@@ -194,7 +201,7 @@ export class CircuitToCanvasDrawer {
     if (element.type === "pcb_trace") {
       drawPcbTrace({
         ctx: this.ctx,
-        trace: element as PCBTrace,
+        trace: element as PcbTrace,
         realToCanvasMat: this.realToCanvasMat,
         colorMap: this.colorMap,
       })
